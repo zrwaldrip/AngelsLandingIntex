@@ -1,41 +1,34 @@
 import { useEffect, useState } from 'react';
-import { Rootbeer } from '../types/Rootbeer';
 import { useNavigate } from 'react-router-dom';
+import { getRootbeers } from '../lib/rootbeerApi';
+import { Rootbeer } from '../types/Rootbeer';
 
-function CompetitionList({
+function RootbeerList({
   selectedContainers,
 }: {
   selectedContainers: string[];
 }) {
-  const [competition, setCompetition] = useState<Rootbeer[]>([]);
+  const [rootbeers, setRootbeers] = useState<Rootbeer[]>([]);
   const [pageSize, setPageSize] = useState<number>(10);
   const [pageNum, setPageNum] = useState<number>(1);
   const [totalItems, setTotalItems] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCompetition = async () => {
-      const containerParams = selectedContainers
-        .map((cont) => `containers=${encodeURIComponent(cont)}`)
-        .join('&');
-
-      const response = await fetch(
-        `https://localhost:5000/Competition/GetRootbeers?pageSize=${pageSize}&pageNum=${pageNum}${selectedContainers.length ? `&${containerParams}` : ''}`
-      );
-
-      const data = await response.json();
-
-      setCompetition(data.brews);
-      setTotalItems(data.totalNumProjects);
-      setTotalPages(Math.ceil(totalItems / pageSize));
+    const fetchRootbeers = async () => {
+      const data = await getRootbeers(pageSize, pageNum, selectedContainers);
+      setRootbeers(data.rootbeers);
+      setTotalItems(data.totalCount);
     };
-    fetchCompetition();
-  }, [pageSize, pageNum, totalItems, selectedContainers]);
+
+    fetchRootbeers();
+  }, [pageSize, pageNum, selectedContainers]);
+
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
   return (
     <>
-      {competition.map((rootbeer) => (
+      {rootbeers.map((rootbeer) => (
         <div id="rootbeerCard" className="card" key={rootbeer.rootbeerID}>
           <h2 className="card-title">{rootbeer.rootbeerName}</h2>
           <div className="card-body">
@@ -62,8 +55,7 @@ function CompetitionList({
                 {rootbeer.currentRetailPrice.toFixed(2)}
               </li>
               <li className="list-group-item">
-                <strong>Available in: </strong>
-                {rootbeer.container}
+                <strong>Available in:</strong> {rootbeer.container}
               </li>
             </ul>
 
@@ -85,11 +77,12 @@ function CompetitionList({
         Previous
       </button>
 
-      {[...Array(totalPages)].map((_, i) => (
-        <button key={i} onClick={() => setPageNum(i + 1)}>
-          {i + 1}
+      {[...Array(totalPages)].map((_, index) => (
+        <button key={index} onClick={() => setPageNum(index + 1)}>
+          {index + 1}
         </button>
       ))}
+
       <button
         disabled={pageNum === totalPages}
         onClick={() => setPageNum(pageNum + 1)}
@@ -102,7 +95,10 @@ function CompetitionList({
         Results per page:
         <select
           value={pageSize}
-          onChange={(e) => setPageSize(Number(e.target.value))}
+          onChange={(event) => {
+            setPageSize(Number(event.target.value));
+            setPageNum(1);
+          }}
         >
           <option value="5">5</option>
           <option value="10">10</option>
@@ -113,4 +109,4 @@ function CompetitionList({
   );
 }
 
-export default CompetitionList;
+export default RootbeerList;

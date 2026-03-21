@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import './ContainerFilter.css'; // Assuming you have some CSS for styling
+import { getContainerTypes } from '../lib/rootbeerApi';
+import './ContainerFilter.css';
 
 function ContainerFilter({
   selectedContainers,
@@ -13,25 +14,19 @@ function ContainerFilter({
   useEffect(() => {
     const fetchContainers = async () => {
       try {
-        const response = await fetch(
-          'https://localhost:5000/Competition/GetContainerTypes'
-        );
-
-        const data = await response.json();
+        const data = await getContainerTypes();
         setContainers(data);
-
-        // Automatically check all fetched containers
-        setSelectedContainers(data);
       } catch (error) {
         console.error('Error fetching container types', error);
       }
     };
+
     fetchContainers();
-  }, [setSelectedContainers]);
+  }, []);
 
   function handleCheckboxChange({ target }: { target: HTMLInputElement }) {
     const updatedContainers = selectedContainers.includes(target.value)
-      ? selectedContainers.filter((x) => x !== target.value)
+      ? selectedContainers.filter((container) => container !== target.value)
       : [...selectedContainers, target.value];
 
     setSelectedContainers(updatedContainers);
@@ -41,18 +36,18 @@ function ContainerFilter({
     <div className="container-filter">
       <h5>Container Types</h5>
       <div className="container-list">
-        {containers.map((c) => (
-          <div key={c} className="container-item">
+        {containers.map((container) => (
+          <div key={container} className="container-item">
             <input
               type="checkbox"
-              id={c}
-              name={c}
-              value={c}
+              id={container}
+              name={container}
+              value={container}
               className="container-checkbox"
               onChange={handleCheckboxChange}
-              checked={selectedContainers.includes(c)}
+              checked={selectedContainers.includes(container)}
             />
-            <label htmlFor={c}>{c}</label>
+            <label htmlFor={container}>{container}</label>
           </div>
         ))}
       </div>

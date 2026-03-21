@@ -1,11 +1,15 @@
 # WebAPI backend with React frontend
+
 This repo is indended for in-class demonstration and discussion and includes errors, inefficiencies, and structural oddities
 
 The project is a loose integration of the following projects:
-* https://github.com/profspencerhilton/WaterProject
-* https://github.com/codingwithtom1/ReactIdentity
 
-The WaterProject code did not contain a license. 
+- <https://github.com/profspencerhilton/WaterProject>
+- <https://github.com/codingwithtom1/ReactIdentity>
+
+Then updated for .NET 10 and given a root beer theme.
+
+The WaterProject code did not contain a license.  
 Code adapted from the ReactIdentity library is licensed under the MIT License.
 
 MIT License

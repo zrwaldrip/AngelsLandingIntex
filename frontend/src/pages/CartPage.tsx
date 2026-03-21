@@ -1,14 +1,12 @@
 import { useNavigate } from 'react-router-dom';
+import CartSummary from '../components/CartSummary';
 import { useCart } from '../context/CartContext';
 import { CartItem } from '../types/CartItem';
-import CartSummary from '../components/CartSummary';
 
 function CartPage() {
   const navigate = useNavigate();
-
   const { cart, removeFromCart } = useCart();
 
-  // Calculate the subtotal
   const subtotal = cart.reduce((total, item: CartItem) => {
     return total + item.quantity * item.price;
   }, 0);
@@ -48,10 +46,9 @@ function CartPage() {
       </div>
       <h3>Subtotal: ${subtotal.toFixed(2)}</h3>
       <button>Proceed to Checkout</button>
-      <button onClick={() => navigate('/competition')}>
-        Continue Browsing
-      </button>
+      <button onClick={() => navigate('/catalog')}>Continue Browsing</button>
     </div>
   );
 }
+
 export default CartPage;

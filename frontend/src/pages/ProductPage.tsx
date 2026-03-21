@@ -1,19 +1,21 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import CartSummary from '../components/CartSummary';
 import Header from '../components/Header';
 import { useCart } from '../context/CartContext';
 import { CartItem } from '../types/CartItem';
-import { useState } from 'react';
-import CartSummary from '../components/CartSummary';
 
 function ProductPage() {
   const navigate = useNavigate();
   const { rootbeerName, rootbeerId, currentRetailPrice } = useParams();
-  const price = currentRetailPrice ? parseFloat(currentRetailPrice) : 0; // Convert to number or fallback to 0
+  const price = currentRetailPrice ? parseFloat(currentRetailPrice) : 0;
+
   if (!rootbeerName || !rootbeerId) {
     throw new Error(
-      'Missing required route parameters: rootBeerName or rootBeerId'
+      'Missing required route parameters: rootbeerName or rootbeerId'
     );
   }
+
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState<number>(1);
 
@@ -24,6 +26,7 @@ function ProductPage() {
       price,
       quantity,
     };
+
     addToCart(newItem);
     navigate('/cart');
   };
@@ -38,7 +41,7 @@ function ProductPage() {
         <select
           name="quantity"
           className="form-select form-select-lg mb-3"
-          onChange={(e) => setQuantity(Number(e.target.value))}
+          onChange={(event) => setQuantity(Number(event.target.value))}
         >
           <option value="1">1</option>
           <option value="2">2</option>
@@ -49,8 +52,9 @@ function ProductPage() {
         <button onClick={handleAddToCart}>Add to Cart</button>
       </div>
 
-      <button onClick={() => navigate('/competition')}>Go Back</button>
+      <button onClick={() => navigate('/catalog')}>Go Back</button>
     </>
   );
 }
+
 export default ProductPage;

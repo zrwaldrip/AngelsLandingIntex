@@ -1,11 +1,12 @@
-import ContainerFilter from '../components/ContainerFilter';
-import CompetitionList from '../components/CompetitionList';
-import Header from '../components/Header';
 import { useState } from 'react';
 import CartSummary from '../components/CartSummary';
+import ContainerFilter from '../components/ContainerFilter';
+import Header from '../components/Header';
+import RootbeerList from '../components/RootbeerList';
 
-function CompetitionPage() {
+function CatalogPage() {
   const [selectedContainers, setSelectedContainers] = useState<string[]>([]);
+
   return (
     <div className="Container mt-4">
       <CartSummary />
@@ -18,10 +19,11 @@ function CompetitionPage() {
           />
         </div>
         <div className="col-md-9">
-          <CompetitionList selectedContainers={selectedContainers} />
+          <RootbeerList selectedContainers={selectedContainers} />
         </div>
       </div>
     </div>
   );
 }
-export default CompetitionPage;
+
+export default CatalogPage;
