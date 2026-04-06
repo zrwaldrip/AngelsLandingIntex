@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using RootkitAuth.API.Data;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +7,9 @@ using Microsoft.AspNetCore.Authentication.Google;
 
 
 var builder = WebApplication.CreateBuilder(args);
+// CreateBuilder only loads user secrets when Environment is Development. Load explicitly so
+// `dotnet user-secrets` works even if ASPNETCORE_ENVIRONMENT is missing or wrong (common in some IDEs).
+builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true);
 const string DefaultFrontendUrl = "http://localhost:3000";
 var frontendUrl = builder.Configuration["FrontendUrl"] ?? DefaultFrontendUrl;
 var allowAnyOrigin = string.Equals(
@@ -144,8 +148,13 @@ static string GetRequiredIdentityConnectionString(IConfiguration configuration)
     var conn = configuration.GetConnectionString("RootkitIdentityConnection");
     if (string.IsNullOrWhiteSpace(conn))
     {
+        var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "(not set)";
         throw new InvalidOperationException(
-            "ConnectionStrings:RootkitIdentityConnection is required. Use your Supabase PostgreSQL connection string (SSL). In Azure App Service, add Application setting RootkitIdentityConnection or ConnectionStrings__RootkitIdentityConnection.");
+            $"ConnectionStrings:RootkitIdentityConnection is empty. Current ASPNETCORE_ENVIRONMENT={env}. " +
+            "For local dev: run from backend/RootkitAuth.API: dotnet user-secrets set \"ConnectionStrings:RootkitIdentityConnection\" \"Host=...;Password=...;SSL Mode=Require\" " +
+            "(or use the key/value form; avoid URI if your shell truncates at '='). " +
+            "Or set appsettings.Development.json ConnectionStrings:RootkitIdentityConnection. " +
+            "In Azure: Application setting ConnectionStrings__RootkitIdentityConnection.");
     }
 
     return conn.Trim();
