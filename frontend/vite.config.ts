@@ -7,7 +7,8 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://localhost:5000',
+        target:
+          'https://angels-landing-backend-e7fcddf4a6anb6g4.centralus-01.azurewebsites.net',
         changeOrigin: true,
         secure: false,
       },

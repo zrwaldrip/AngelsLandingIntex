@@ -6,7 +6,11 @@ export interface ExternalAuthProvider {
   displayName: string;
 }
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+const defaultApiBaseUrl =
+  'https://angels-landing-backend-e7fcddf4a6anb6g4.centralus-01.azurewebsites.net';
+const apiBaseUrl = (
+  import.meta.env.VITE_API_BASE_URL ?? defaultApiBaseUrl
+).replace(/\/+$/, '');
 
 async function readApiError(
   response: Response,
