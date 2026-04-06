@@ -7,12 +7,12 @@ import { CartItem } from '../types/CartItem';
 
 function ProductPage() {
   const navigate = useNavigate();
-  const { rootbeerName, rootbeerId, currentRetailPrice } = useParams();
+  const { entryName, entryId, currentRetailPrice } = useParams();
   const price = currentRetailPrice ? parseFloat(currentRetailPrice) : 0;
 
-  if (!rootbeerName || !rootbeerId) {
+  if (!entryName || !entryId) {
     throw new Error(
-      'Missing required route parameters: rootbeerName or rootbeerId'
+      'Missing required route parameters: entryName or entryId'
     );
   }
 
@@ -21,8 +21,8 @@ function ProductPage() {
 
   const handleAddToCart = () => {
     const newItem: CartItem = {
-      rootbeerId,
-      rootbeerName,
+      entryId,
+      entryName,
       price,
       quantity,
     };
@@ -35,8 +35,8 @@ function ProductPage() {
     <>
       <CartSummary />
       <Header />
-      <h1>Want a cold refreshing {rootbeerName}?</h1>
-      <h2>Only ${price.toFixed(2)}</h2>
+      <h1>Support the {entryName} initiative</h1>
+      <h2>Suggested contribution: ${price.toFixed(2)}</h2>
       <div>
         <select
           name="quantity"
@@ -49,7 +49,7 @@ function ProductPage() {
           <option value="4">4</option>
           <option value="5">5</option>
         </select>
-        <button onClick={handleAddToCart}>Add to Cart</button>
+        <button onClick={handleAddToCart}>Add to Support Cart</button>
       </div>
 
       <button onClick={() => navigate('/catalog')}>Go Back</button>

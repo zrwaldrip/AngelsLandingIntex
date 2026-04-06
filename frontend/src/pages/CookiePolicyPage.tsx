@@ -8,10 +8,10 @@ function CookiePolicyPage() {
         <div className="col-lg-10">
           <div className="card shadow-sm text-start">
             <div className="card-body p-4 p-lg-5">
-              <h2 className="h3 mb-3">Cookie Policy</h2>
+              <h2 className="h3 mb-3">Angels' Landing Cookie Policy</h2>
               <p className="text-muted">
-                This teaching app uses a small set of essential cookies to keep
-                authentication and external-login flows working.
+                Angels' Landing uses a small set of essential cookies to keep
+                secure authentication and external-login flows working.
               </p>
 
               <h3 className="h5 mt-4">Essential cookies used by this app</h3>
@@ -26,7 +26,7 @@ function CookiePolicyPage() {
                   Authentication.
                 </li>
                 <li>
-                  This banner stores a local acknowledgement flag in the browser
+                  This banner stores a local acknowledgement flag in your browser
                   so the notice does not reappear on every page load.
                 </li>
               </ul>
@@ -40,8 +40,9 @@ function CookiePolicyPage() {
 
               <h3 className="h5 mt-4">Note</h3>
               <p className="mb-0">
-                In a real production app, legal requirements depend on your
-                jurisdiction, audience, and the categories of data you collect.
+                Legal requirements depend on your jurisdiction, audience, and the
+                categories of data you collect. This policy is intended for the
+                Angels' Landing course project.
               </p>
             </div>
           </div>

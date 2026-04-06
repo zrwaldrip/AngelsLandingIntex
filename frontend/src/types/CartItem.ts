@@ -1,6 +1,6 @@
 export interface CartItem {
-  rootbeerId: string;
-  rootbeerName: string;
+  entryId: string;
+  entryName: string;
   quantity: number;
   price: number;
 }

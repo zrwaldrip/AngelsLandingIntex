@@ -23,7 +23,7 @@ function Header() {
   return (
     <header className="row bg-secondary text-white mb-4 p-3 rounded align-items-center">
       <div className="col-lg-4">
-        <h1 className="h3 mb-0">Rootkit Rootbeer Catalog</h1>
+        <h1 className="h3 mb-0">Angels' Landing</h1>
       </div>
       <div className="col-lg-4 mt-3 mt-lg-0 text-lg-center">
         <span className={statusClassName}>{statusText}</span>
@@ -31,10 +31,10 @@ function Header() {
       <div className="col-lg-4 mt-3 mt-lg-0">
         <nav className="d-flex gap-3 justify-content-lg-end flex-wrap">
           <NavLink className="text-white text-decoration-none" to="/catalog">
-            Catalog
+            Impact Dashboard
           </NavLink>
           <NavLink className="text-white text-decoration-none" to="/cart">
-            Cart
+            Support Cart
           </NavLink>
           <NavLink className="text-white text-decoration-none" to="/cookies">
             Cookies
@@ -47,7 +47,7 @@ function Header() {
           {isAdmin ? (
             <NavLink
               className="text-white text-decoration-none"
-              to="/admin/rootbeers"
+              to="/admin/program-entries"
             >
               Admin
             </NavLink>
