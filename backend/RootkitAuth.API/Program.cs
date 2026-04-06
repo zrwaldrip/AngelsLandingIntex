@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.Google;
 
 
 var builder = WebApplication.CreateBuilder(args);
-const string FrontendCorsPolicy = "FrontendClient";
 const string DefaultFrontendUrl = "http://localhost:3000";
 var frontendUrl = builder.Configuration["FrontendUrl"] ?? DefaultFrontendUrl;
 var allowAnyOrigin = string.Equals(
@@ -137,28 +136,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(FrontendCorsPolicy, policy =>
-    {
-        if (allowAnyOrigin)
-        {
-            // WARNING: Very permissive. Use only temporarily for deployment/testing.
-            // Allows credentialed requests from any origin.
-            policy.SetIsOriginAllowed(_ => true)
-                .AllowCredentials()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        }
-        else
-        {
-            policy.WithOrigins(corsOrigins.Distinct(StringComparer.OrdinalIgnoreCase).ToArray())
-                .AllowCredentials()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        }
-    });
-});
+// CORS is applied via ManualCorsMiddleware (below). Avoid duplicating with AddCors + Azure Portal CORS.
 
 var app = builder.Build();
 
@@ -178,16 +156,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// CORS must run after routing is established. Keep it early so preflight + all API responses get headers.
+// CORS: explicit middleware so Azure App Service portal CORS cannot strip Allow-Credentials.
+// In Azure Portal → API → CORS: leave empty OR disable; configure origins via FrontendUrl / Cors:AllowedOrigins only.
 app.UseRouting();
-app.UseCors(FrontendCorsPolicy);
+app.UseManualCors(allowAnyOrigin, corsOrigins);
 app.UseSecurityHeaders();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-// Identity minimal APIs + conventional controllers need explicit CORS endpoint metadata in some hosts.
-app.MapControllers().RequireCors(FrontendCorsPolicy);
-app.MapGroup("/api/auth")
-    .RequireCors(FrontendCorsPolicy)
-    .MapIdentityApi<ApplicationUser>();
+app.MapControllers();
+app.MapGroup("/api/auth").MapIdentityApi<ApplicationUser>();
 app.Run();
