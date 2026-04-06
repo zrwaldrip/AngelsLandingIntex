@@ -5,9 +5,6 @@ import { registerUser } from '../lib/authAPI';
 
 function RegisterPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -15,6 +12,10 @@ function RegisterPage() {
     event.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get('email') ?? '').trim();
+    const password = String(formData.get('password') ?? '');
+    const confirmPassword = String(formData.get('confirmPassword') ?? '');
 
     if (password !== confirmPassword) {
       setErrorMessage('Passwords must match.');
@@ -55,10 +56,10 @@ function RegisterPage() {
                   </label>
                   <input
                     id="email"
+                    name="email"
                     type="email"
                     className="form-control"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
+                    autoComplete="username"
                     required
                   />
                 </div>
@@ -68,10 +69,10 @@ function RegisterPage() {
                   </label>
                   <input
                     id="password"
+                    name="password"
                     type="password"
                     className="form-control"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="new-password"
                     required
                   />
                 </div>
@@ -81,10 +82,10 @@ function RegisterPage() {
                   </label>
                   <input
                     id="confirmPassword"
+                    name="confirmPassword"
                     type="password"
                     className="form-control"
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    autoComplete="new-password"
                     required
                   />
                 </div>
