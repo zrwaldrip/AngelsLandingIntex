@@ -83,6 +83,62 @@ static string EnsureAzureWritableSqlite(string? configuredConnectionString, stri
     return $"{DataSourcePrefix}{dbPath}";
 }
 
+static string ParseSqlitePathFromConnectionString(string conn)
+{
+    const string prefix = "Data Source=";
+    var t = conn.Trim();
+    if (!t.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+    {
+        return string.Empty;
+    }
+
+    var rest = t[prefix.Length..].Trim();
+    if (rest.Length >= 2 && rest[0] == '"' && rest[^1] == '"')
+    {
+        return rest[1..^1];
+    }
+
+    return rest;
+}
+
+/// <summary>
+/// On Azure, the catalog DB lives under /home/site/data. Copy the published seed file there on first run.
+/// </summary>
+static void EnsureProgramEntrySqliteFromSeed(IConfiguration configuration)
+{
+    var resolved = EnsureAzureWritableSqlite(
+        configuration.GetConnectionString("RootkitAuthConnection"),
+        "RootkitAuth.sqlite");
+    var path = ParseSqlitePathFromConnectionString(resolved);
+    if (string.IsNullOrEmpty(path))
+    {
+        return;
+    }
+
+    var seedPath = Path.Combine(AppContext.BaseDirectory, "RootkitAuth.sqlite");
+    if (!File.Exists(seedPath))
+    {
+        return;
+    }
+
+    if (File.Exists(path))
+    {
+        var len = new FileInfo(path).Length;
+        if (len > 0)
+        {
+            return;
+        }
+    }
+
+    var dir = Path.GetDirectoryName(path);
+    if (!string.IsNullOrEmpty(dir))
+    {
+        Directory.CreateDirectory(dir);
+    }
+
+    File.Copy(seedPath, path, overwrite: true);
+}
+
 builder.Services.AddDbContext<ProgramEntryDbContext>(options =>
     options.UseSqlite(
         EnsureAzureWritableSqlite(
@@ -140,10 +196,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
+EnsureProgramEntrySqliteFromSeed(app.Configuration);
+
 using (var scope = app.Services.CreateScope())
 {
     await AuthIdentityGenerator.GenerateDefaultIdentityAsync(scope.ServiceProvider, app.Configuration);
-    }
+
+    var programEntryDb = scope.ServiceProvider.GetRequiredService<ProgramEntryDbContext>();
+    await programEntryDb.Database.EnsureCreatedAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
