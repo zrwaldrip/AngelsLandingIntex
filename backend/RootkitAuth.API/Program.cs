@@ -139,6 +139,18 @@ static void EnsureProgramEntrySqliteFromSeed(IConfiguration configuration)
     File.Copy(seedPath, path, overwrite: true);
 }
 
+static string GetRequiredIdentityConnectionString(IConfiguration configuration)
+{
+    var conn = configuration.GetConnectionString("RootkitIdentityConnection");
+    if (string.IsNullOrWhiteSpace(conn))
+    {
+        throw new InvalidOperationException(
+            "ConnectionStrings:RootkitIdentityConnection is required. Use your Supabase PostgreSQL connection string (SSL). In Azure App Service, add Application setting RootkitIdentityConnection or ConnectionStrings__RootkitIdentityConnection.");
+    }
+
+    return conn.Trim();
+}
+
 builder.Services.AddDbContext<ProgramEntryDbContext>(options =>
     options.UseSqlite(
         EnsureAzureWritableSqlite(
@@ -146,10 +158,7 @@ builder.Services.AddDbContext<ProgramEntryDbContext>(options =>
             "RootkitAuth.sqlite")));
 
 builder.Services.AddDbContext<AuthIdentityDbContext>(options =>
-    options.UseSqlite(
-        EnsureAzureWritableSqlite(
-            builder.Configuration.GetConnectionString("RootkitIdentityConnection"),
-            "RootkitIdentity.sqlite")));
+    options.UseNpgsql(GetRequiredIdentityConnectionString(builder.Configuration)));
 
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
     .AddRoles<IdentityRole>()
@@ -200,6 +209,9 @@ EnsureProgramEntrySqliteFromSeed(app.Configuration);
 
 using (var scope = app.Services.CreateScope())
 {
+    var authIdentityDb = scope.ServiceProvider.GetRequiredService<AuthIdentityDbContext>();
+    await authIdentityDb.Database.MigrateAsync();
+
     await AuthIdentityGenerator.GenerateDefaultIdentityAsync(scope.ServiceProvider, app.Configuration);
 
     var programEntryDb = scope.ServiceProvider.GetRequiredService<ProgramEntryDbContext>();
