@@ -2,41 +2,60 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 function Header() {
-  const { isAuthenticated } = useAuth();
+  // Pull all necessary values from your context
+  const { isAuthenticated, isAdmin, statusText, statusClassName } = useAuth();
 
   return (
-    <header className="bg-dark text-white p-4 mb-4 rounded text-center">
-      <h1 className="mb-3">Angels Landing</h1>
+    <header className="row bg-secondary text-white mb-4 p-3 rounded align-items-center">
+      {/* Brand/Title Section */}
+      <div className="col-lg-4">
+        <h1 className="h3 mb-0">Angels' Landing</h1>
+      </div>
 
-      <nav className="d-flex justify-content-center gap-3 flex-wrap">
-        <NavLink className="text-white text-decoration-none" to="/">
-          Home
-        </NavLink>
+      {/* Status Indicator (from Main) */}
+      <div className="col-lg-4 mt-3 mt-lg-0 text-lg-center">
+        <span className={statusClassName}>{statusText}</span>
+      </div>
 
-        <NavLink className="text-white text-decoration-none" to="/cookies">
-          Cookies
-        </NavLink>
+      {/* Navigation Section */}
+      <div className="col-lg-4 mt-3 mt-lg-0">
+        <nav className="d-flex gap-3 justify-content-lg-end flex-wrap">
+          <NavLink className="text-white text-decoration-none" to="/catalog">
+            Impact Dashboard
+          </NavLink>
+          <NavLink className="text-white text-decoration-none" to="/cookies">
+            Cookies
+          </NavLink>
 
-        {!isAuthenticated ? (
-          <>
-            <NavLink className="text-white text-decoration-none" to="/login">
-              Login
+          {/* Conditional Admin Link */}
+          {isAdmin && (
+            <NavLink className="text-white text-decoration-none" to="/admin/program-entries">
+              Admin
             </NavLink>
-            <NavLink className="text-white text-decoration-none" to="/register">
-              Register
-            </NavLink>
-          </>
-        ) : (
-          <>
-            <NavLink className="text-white text-decoration-none" to="/mfa">
-              MFA
-            </NavLink>
-            <NavLink className="text-white text-decoration-none" to="/logout">
-              Logout
-            </NavLink>
-          </>
-        )}
-      </nav>
+          )}
+
+          {/* Authentication Logic */}
+          {!isAuthenticated ? (
+            <>
+              <NavLink className="text-white text-decoration-none" to="/login">
+                Login
+              </NavLink>
+              <NavLink className="text-white text-decoration-none" to="/register">
+                Register
+              </NavLink>
+            </>
+          ) : (
+            <>
+              <NavLink className="text-white text-decoration-none" to="/mfa">
+                MFA
+              </NavLink>
+              <NavLink className="text-white text-decoration-none" to="/logout">
+                Logout
+              </NavLink>
+            </>
+          )}
+        </nav>
+      </div>
     </header>
   );
 }

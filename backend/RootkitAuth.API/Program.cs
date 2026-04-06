@@ -16,7 +16,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<RootbeerDbContext>(options =>
+builder.Services.AddDbContext<ProgramEntryDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("RootkitAuthConnection")));
 
 builder.Services.AddDbContext<AuthIdentityDbContext>(options =>

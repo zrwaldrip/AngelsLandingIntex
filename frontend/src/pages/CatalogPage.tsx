@@ -2,7 +2,7 @@ import { useState } from 'react';
 import CartSummary from '../components/CartSummary';
 import ContainerFilter from '../components/ContainerFilter';
 import Header from '../components/Header';
-import RootbeerList from '../components/RootbeerList';
+import ProgramEntryList from '../components/ProgramEntryList';
 
 function CatalogPage() {
   const [selectedContainers, setSelectedContainers] = useState<string[]>([]);
@@ -19,7 +19,11 @@ function CatalogPage() {
           />
         </div>
         <div className="col-md-9">
-          <RootbeerList selectedContainers={selectedContainers} />
+          <div className="mb-3 text-muted">
+            Explore Angels' Landing impact entries across safehouses, partner
+            programs, and support initiatives.
+          </div>
+          <ProgramEntryList selectedContainers={selectedContainers} />
         </div>
       </div>
     </div>

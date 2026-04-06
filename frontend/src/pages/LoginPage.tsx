@@ -76,9 +76,9 @@ function LoginPage() {
             <div className="card-body p-4">
               <h2 className="h4 mb-3">Login</h2>
               <p className="text-muted">
-                Sign in with an Identity cookie. If MFA is enabled for the
-                account, include either an authenticator code or a recovery
-                code.
+                Sign in to the Angels' Landing portal. If MFA is enabled for
+                your account, include either an authenticator code or a
+                recovery code.
               </p>
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">

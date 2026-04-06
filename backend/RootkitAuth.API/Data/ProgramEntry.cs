@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RootkitAuth.API.Data;
 
-public class Rootbeer
+public class ProgramEntry
 {
     [Key]
     public int RootbeerID { get; set; }

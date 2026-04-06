@@ -27,7 +27,7 @@ function ManageMfaPage() {
       return '';
     }
 
-    const issuer = 'Rootkit Rootbeer';
+    const issuer = "Angels' Landing";
     const label = `${issuer}:${authSession.email}`;
     const searchParams = new URLSearchParams({
       secret: twoFactorStatus.sharedKey,
@@ -139,7 +139,7 @@ function ManageMfaPage() {
         <div className="col-lg-8">
           <div className="card shadow-sm mb-4">
             <div className="card-body p-4">
-              <h2 className="h4 mb-3">Authenticator App MFA</h2>
+              <h2 className="h4 mb-3">Angels' Landing Authenticator MFA</h2>
               <p className="text-muted mb-3">
                 This page uses the built-in ASP.NET Core Identity 2FA endpoint
                 to enroll an authenticator app, confirm setup with a TOTP code,

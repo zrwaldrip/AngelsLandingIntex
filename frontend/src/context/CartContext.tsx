@@ -4,7 +4,7 @@ import { CartItem } from '../types/CartItem';
 interface CartContextType {
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (rootBeerID: string) => void;
+  removeFromCart: (entryId: string) => void;
   clearCart: () => void;
 }
 
@@ -16,10 +16,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const addToCart = (item: CartItem) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(
-        (prevItem) => prevItem.rootbeerId === item.rootbeerId
+        (prevItem) => prevItem.entryId === item.entryId
       );
       const updatedCart = prevCart.map((c) =>
-        c.rootbeerId === item.rootbeerId
+        c.entryId === item.entryId
           ? {
               ...c,
               price: item.price,
@@ -31,9 +31,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const removeFromCart = (rootBeerID: string) => {
+  const removeFromCart = (entryId: string) => {
     setCart((prevCart) =>
-      prevCart.filter((item) => item.rootbeerId !== rootBeerID)
+      prevCart.filter((item) => item.entryId !== entryId)
     );
   };
 
