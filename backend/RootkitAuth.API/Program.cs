@@ -16,11 +16,53 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+static string EnsureAzureWritableSqlite(string? configuredConnectionString, string fallbackFileName)
+{
+    // On Azure App Service (Linux), the app directory may be read-only. /home is writable.
+    // If the configured connection string points to a relative sqlite file, relocate it under /home.
+    var conn = configuredConnectionString;
+    if (string.IsNullOrWhiteSpace(conn))
+    {
+        conn = $"Data Source={fallbackFileName}";
+    }
+
+    const string DataSourcePrefix = "Data Source=";
+    if (!conn.TrimStart().StartsWith(DataSourcePrefix, StringComparison.OrdinalIgnoreCase))
+    {
+        return conn;
+    }
+
+    var ds = conn.Trim()[DataSourcePrefix.Length..].Trim().Trim('"');
+    var isPathRooted =
+        Path.IsPathRooted(ds) ||
+        ds.StartsWith("/", StringComparison.Ordinal); // linux absolute path
+
+    var home = Environment.GetEnvironmentVariable("HOME");
+    var runningInAzure = !string.IsNullOrWhiteSpace(home);
+
+    if (!runningInAzure || isPathRooted)
+    {
+        return conn;
+    }
+
+    var dbDir = Path.Combine(home!, "site", "data");
+    Directory.CreateDirectory(dbDir);
+    var dbPath = Path.Combine(dbDir, Path.GetFileName(ds));
+
+    return $"{DataSourcePrefix}{dbPath}";
+}
+
 builder.Services.AddDbContext<ProgramEntryDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("RootkitAuthConnection")));
+    options.UseSqlite(
+        EnsureAzureWritableSqlite(
+            builder.Configuration.GetConnectionString("RootkitAuthConnection"),
+            "RootkitAuth.sqlite")));
 
 builder.Services.AddDbContext<AuthIdentityDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("RootkitIdentityConnection")));
+    options.UseSqlite(
+        EnsureAzureWritableSqlite(
+            builder.Configuration.GetConnectionString("RootkitIdentityConnection"),
+            "RootkitIdentity.sqlite")));
 
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
     .AddRoles<IdentityRole>()
