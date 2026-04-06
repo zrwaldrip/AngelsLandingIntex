@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,159 @@ public class AuthController(
 {
     private const string DefaultFrontendUrl = "http://localhost:3000";
     private const string DefaultExternalReturnPath = "/catalog";
+
+    public sealed class LoginRequest
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Password { get; set; } = string.Empty;
+
+        public string? TwoFactorCode { get; set; }
+
+        public string? TwoFactorRecoveryCode { get; set; }
+    }
+
+    [HttpPost("login")]
+    [HttpPost("login-detailed")]
+    public async Task<IActionResult> Login(
+        [FromBody] LoginRequest request,
+        [FromQuery] bool? useCookies = null,
+        [FromQuery] bool? useSessionCookies = null,
+        [FromQuery] bool? useCookie = null)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var user = await userManager.FindByEmailAsync(request.Email);
+
+        if (user is null)
+        {
+            return Unauthorized(new
+            {
+                message = "No account exists for that email address."
+            });
+        }
+
+        var isPersistent = useCookies == true || useCookie == true;
+        if (useSessionCookies == true)
+        {
+            isPersistent = false;
+        }
+
+        if (!await signInManager.CanSignInAsync(user))
+        {
+            return Unauthorized(new
+            {
+                message = "This account is not allowed to sign in."
+            });
+        }
+
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            return Unauthorized(new
+            {
+                message = "This account is locked out due to too many failed attempts. Try again later."
+            });
+        }
+
+        var passwordIsValid = await userManager.CheckPasswordAsync(user, request.Password);
+
+        if (!passwordIsValid)
+        {
+            await userManager.AccessFailedAsync(user);
+
+            if (await userManager.IsLockedOutAsync(user))
+            {
+                return Unauthorized(new
+                {
+                    message = "This account is locked out due to too many failed attempts. Try again later."
+                });
+            }
+
+            return Unauthorized(new
+            {
+                message = "The password is incorrect."
+            });
+        }
+
+        if (user.TwoFactorEnabled)
+        {
+            var hasAuthenticatorCode = !string.IsNullOrWhiteSpace(request.TwoFactorCode);
+            var hasRecoveryCode = !string.IsNullOrWhiteSpace(request.TwoFactorRecoveryCode);
+
+            if (!hasAuthenticatorCode && !hasRecoveryCode)
+            {
+                return Unauthorized(new
+                {
+                    message = "MFA is enabled for this account. Provide an authenticator or recovery code."
+                });
+            }
+
+            if (hasAuthenticatorCode)
+            {
+                var normalizedCode = request.TwoFactorCode!.Replace(" ", string.Empty).Replace("-", string.Empty);
+                var tokenIsValid = await userManager.VerifyTwoFactorTokenAsync(
+                    user,
+                    TokenOptions.DefaultAuthenticatorProvider,
+                    normalizedCode);
+
+                if (!tokenIsValid)
+                {
+                    await userManager.AccessFailedAsync(user);
+
+                    if (await userManager.IsLockedOutAsync(user))
+                    {
+                        return Unauthorized(new
+                        {
+                            message = "This account is locked out due to too many failed attempts. Try again later."
+                        });
+                    }
+
+                    return Unauthorized(new
+                    {
+                        message = "The authenticator code is invalid."
+                    });
+                }
+            }
+            else
+            {
+                var recoveryResult = await userManager.RedeemTwoFactorRecoveryCodeAsync(
+                    user,
+                    request.TwoFactorRecoveryCode!);
+
+                if (!recoveryResult.Succeeded)
+                {
+                    await userManager.AccessFailedAsync(user);
+
+                    if (await userManager.IsLockedOutAsync(user))
+                    {
+                        return Unauthorized(new
+                        {
+                            message = "This account is locked out due to too many failed attempts. Try again later."
+                        });
+                    }
+
+                    return Unauthorized(new
+                    {
+                        message = "The recovery code is invalid."
+                    });
+                }
+            }
+        }
+
+        await userManager.ResetAccessFailedCountAsync(user);
+        await signInManager.SignInAsync(user, isPersistent);
+
+        return Ok(new
+        {
+            message = "Login successful."
+        });
+    }
 
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentSession()
