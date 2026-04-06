@@ -13,6 +13,34 @@ var allowAnyOrigin = string.Equals(
     builder.Configuration["Cors:AllowAnyOrigin"],
     "true",
     StringComparison.OrdinalIgnoreCase);
+
+// Comma-separated list, e.g. "http://localhost:3000,https://your-app.azurestaticapps.net"
+// Azure App Service: set Cors__AllowedOrigins (or FrontendUrl alone still works).
+var corsAllowedOriginsRaw = builder.Configuration["Cors:AllowedOrigins"];
+var corsOrigins = new List<string>();
+if (!string.IsNullOrWhiteSpace(corsAllowedOriginsRaw))
+{
+    foreach (var part in corsAllowedOriginsRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    {
+        corsOrigins.Add(part.TrimEnd('/'));
+    }
+}
+
+if (corsOrigins.Count == 0 && !string.IsNullOrWhiteSpace(frontendUrl))
+{
+    corsOrigins.Add(frontendUrl.TrimEnd('/'));
+}
+
+if (corsOrigins.Count == 0)
+{
+    corsOrigins.Add(DefaultFrontendUrl);
+}
+
+// Cookies must use SameSite=None for cross-site (SWA origin → App Service API) with credentials.
+var needsCrossSiteAuthCookies =
+    allowAnyOrigin ||
+    corsOrigins.Exists(static o =>
+        o.StartsWith("https://", StringComparison.OrdinalIgnoreCase));
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 
@@ -102,9 +130,8 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    // Cross-site SPA + API hosting (SWA + App Service) needs SameSite=None for cookies.
-    // This is less strict than Lax, so only use it when you explicitly enable any-origin CORS.
-    options.Cookie.SameSite = allowAnyOrigin ? SameSiteMode.None : SameSiteMode.Lax;
+    // Cross-site SPA + API (e.g. Azure Static Web Apps → App Service) needs SameSite=None for fetch(..., credentials).
+    options.Cookie.SameSite = needsCrossSiteAuthCookies ? SameSiteMode.None : SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
     options.SlidingExpiration = true;
@@ -125,7 +152,7 @@ builder.Services.AddCors(options =>
         }
         else
         {
-            policy.WithOrigins(frontendUrl)
+            policy.WithOrigins(corsOrigins.Distinct(StringComparer.OrdinalIgnoreCase).ToArray())
                 .AllowCredentials()
                 .AllowAnyMethod()
                 .AllowAnyHeader();
@@ -153,6 +180,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseSecurityHeaders();
 
+// CORS must run after routing is established so endpoint metadata applies correctly.
+app.UseRouting();
 app.UseCors(FrontendCorsPolicy);
 app.UseHttpsRedirection();
 app.UseAuthentication();
