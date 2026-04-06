@@ -1,4 +1,5 @@
 using System.Reflection;
+using Npgsql;
 using Microsoft.EntityFrameworkCore;
 using RootkitAuth.API.Data;
 using Microsoft.AspNetCore.Identity;
@@ -143,6 +144,64 @@ static void EnsureProgramEntrySqliteFromSeed(IConfiguration configuration)
     File.Copy(seedPath, path, overwrite: true);
 }
 
+/// <summary>
+/// Direct host <c>db.&lt;ref&gt;.supabase.co</c> often resolves to IPv6 only. Many local networks have no IPv6 route,
+/// causing "No route to host". Session pooler <c>aws-0-&lt;region&gt;.pooler.supabase.com</c> has IPv4.
+/// Set <c>Supabase:UseSessionPooler</c> true and <c>Supabase:AwsRegion</c> (from Supabase project settings).
+/// </summary>
+static string MaybeRewriteSupabaseDirectToSessionPooler(string connectionString, IConfiguration configuration)
+{
+    var usePooler = string.Equals(
+        configuration["Supabase:UseSessionPooler"],
+        "true",
+        StringComparison.OrdinalIgnoreCase);
+    if (!usePooler)
+    {
+        return connectionString;
+    }
+
+    var region = configuration["Supabase:AwsRegion"]?.Trim();
+    if (string.IsNullOrEmpty(region))
+    {
+        return connectionString;
+    }
+
+    NpgsqlConnectionStringBuilder builder;
+    try
+    {
+        builder = new NpgsqlConnectionStringBuilder(connectionString);
+    }
+    catch
+    {
+        return connectionString;
+    }
+
+    var host = builder.Host;
+    if (string.IsNullOrEmpty(host))
+    {
+        return connectionString;
+    }
+
+    const string prefix = "db.";
+    const string suffix = ".supabase.co";
+    if (!host.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ||
+        !host.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+    {
+        return connectionString;
+    }
+
+    var projectRef = host[prefix.Length..^suffix.Length];
+    if (string.IsNullOrEmpty(projectRef))
+    {
+        return connectionString;
+    }
+
+    builder.Host = $"aws-0-{region}.pooler.supabase.com";
+    builder.Username = $"postgres.{projectRef}";
+    builder.Port = builder.Port == 0 ? 5432 : builder.Port;
+    return builder.ConnectionString;
+}
+
 static string GetRequiredIdentityConnectionString(IConfiguration configuration)
 {
     var conn = configuration.GetConnectionString("RootkitIdentityConnection");
@@ -157,7 +216,9 @@ static string GetRequiredIdentityConnectionString(IConfiguration configuration)
             "In Azure: Application setting ConnectionStrings__RootkitIdentityConnection.");
     }
 
-    return conn.Trim();
+    conn = conn.Trim();
+    conn = MaybeRewriteSupabaseDirectToSessionPooler(conn, configuration);
+    return conn;
 }
 
 builder.Services.AddDbContext<ProgramEntryDbContext>(options =>
