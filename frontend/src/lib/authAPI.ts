@@ -150,14 +150,17 @@ export async function loginUser(
     body.twoFactorRecoveryCode = twoFactorRecoveryCode;
   }
 
-  const response = await fetch(`${apiBaseUrl}/api/auth/login?${searchParams}`, {
+  const response = await fetch(
+    `${apiBaseUrl}/api/auth/login-detailed?${searchParams}`,
+    {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
     body: JSON.stringify(body),
-  });
+    }
+  );
 
   if (!response.ok) {
     throw new Error(
