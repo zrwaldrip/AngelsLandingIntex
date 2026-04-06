@@ -219,6 +219,7 @@ function ManageMfaPage() {
                             </label>
                             <input
                               id="authenticatorCode"
+                              name="authenticatorCode"
                               type="text"
                               className="form-control"
                               inputMode="numeric"

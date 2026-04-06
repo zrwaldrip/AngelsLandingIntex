@@ -13,8 +13,6 @@ function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { refreshAuthState } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [recoveryCode, setRecoveryCode] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
@@ -43,6 +41,9 @@ function LoginPage() {
     event.preventDefault();
     setErrorMessage('');
     setIsSubmitting(true);
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get('email') ?? '').trim();
+    const password = String(formData.get('password') ?? '');
 
     try {
       await loginUser(
@@ -87,11 +88,10 @@ function LoginPage() {
                   </label>
                   <input
                     id="email"
+                    name="email"
                     type="email"
                     className="form-control"
                     autoComplete="username"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
                     required
                   />
                 </div>
@@ -101,11 +101,10 @@ function LoginPage() {
                   </label>
                   <input
                     id="password"
+                    name="password"
                     type="password"
                     className="form-control"
                     autoComplete="current-password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
                     required
                   />
                 </div>
@@ -115,6 +114,7 @@ function LoginPage() {
                   </label>
                   <input
                     id="twoFactorCode"
+                    name="twoFactorCode"
                     type="text"
                     className="form-control"
                     inputMode="numeric"
@@ -132,6 +132,7 @@ function LoginPage() {
                   </label>
                   <input
                     id="recoveryCode"
+                    name="recoveryCode"
                     type="text"
                     className="form-control"
                     autoComplete="off"
@@ -146,6 +147,7 @@ function LoginPage() {
                 <div className="form-check mb-3">
                   <input
                     id="rememberMe"
+                    name="rememberMe"
                     type="checkbox"
                     className="form-check-input"
                     checked={rememberMe}
