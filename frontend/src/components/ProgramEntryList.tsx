@@ -1,61 +1,61 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getRootbeers } from '../lib/rootbeerApi';
-import { Rootbeer } from '../types/Rootbeer';
+import { getProgramEntries } from '../lib/programEntryApi';
+import { ProgramEntry } from '../types/ProgramEntry';
 
-function RootbeerList({
+function ProgramEntryList({
   selectedContainers,
 }: {
   selectedContainers: string[];
 }) {
-  const [rootbeers, setRootbeers] = useState<Rootbeer[]>([]);
+  const [entries, setEntries] = useState<ProgramEntry[]>([]);
   const [pageSize, setPageSize] = useState<number>(10);
   const [pageNum, setPageNum] = useState<number>(1);
   const [totalItems, setTotalItems] = useState<number>(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchRootbeers = async () => {
-      const data = await getRootbeers(pageSize, pageNum, selectedContainers);
-      setRootbeers(data.rootbeers);
+    const fetchEntries = async () => {
+      const data = await getProgramEntries(pageSize, pageNum, selectedContainers);
+      setEntries(data.entries);
       setTotalItems(data.totalCount);
     };
 
-    fetchRootbeers();
+    fetchEntries();
   }, [pageSize, pageNum, selectedContainers]);
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
   return (
     <>
-      {rootbeers.map((rootbeer) => (
-        <div id="rootbeerCard" className="card" key={rootbeer.rootbeerID}>
-          <h2 className="card-title">{rootbeer.rootbeerName}</h2>
+      {entries.map((entry) => (
+        <div id="entryCard" className="card" key={entry.rootbeerID}>
+          <h2 className="card-title">{entry.rootbeerName}</h2>
           <div className="card-body">
             <ul className="list-group list-group-flush">
               <li className="list-group-item">
-                <strong>First brewed:</strong> {rootbeer.firstBrewedYear}
+                <strong>Year started:</strong> {entry.firstBrewedYear}
               </li>
               <li className="list-group-item">
-                <strong>Brewery:</strong> {rootbeer.breweryName}
+                <strong>Partner or provider:</strong> {entry.breweryName}
               </li>
               <li className="list-group-item">
-                <strong>Location:</strong> {rootbeer.city}, {rootbeer.state},{' '}
-                {rootbeer.country}
+                <strong>Location:</strong> {entry.city}, {entry.state},{' '}
+                {entry.country}
               </li>
               <li className="list-group-item">
-                <strong>Description:</strong> {rootbeer.description}
+                <strong>Description:</strong> {entry.description}
               </li>
               <li className="list-group-item">
-                <strong>Wholesale cost:</strong> $
-                {rootbeer.wholesaleCost.toFixed(2)}
+                <strong>Program investment:</strong> $
+                {entry.wholesaleCost.toFixed(2)}
               </li>
               <li className="list-group-item">
-                <strong>Retail price:</strong> $
-                {rootbeer.currentRetailPrice.toFixed(2)}
+                <strong>Suggested contribution:</strong> $
+                {entry.currentRetailPrice.toFixed(2)}
               </li>
               <li className="list-group-item">
-                <strong>Available in:</strong> {rootbeer.container}
+                <strong>Program area:</strong> {entry.container}
               </li>
             </ul>
 
@@ -63,11 +63,11 @@ function RootbeerList({
               className="btn btn-secondary"
               onClick={() =>
                 navigate(
-                  `/product/${rootbeer.rootbeerName}/${rootbeer.rootbeerID}/${rootbeer.currentRetailPrice}`
+                  `/product/${entry.rootbeerName}/${entry.rootbeerID}/${entry.currentRetailPrice}`
                 )
               }
             >
-              Buy Now!
+              View Details
             </button>
           </div>
         </div>
@@ -109,4 +109,4 @@ function RootbeerList({
   );
 }
 
-export default RootbeerList;
+export default ProgramEntryList;

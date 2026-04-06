@@ -52,7 +52,7 @@ function LogoutPage() {
               ) : null}
               <div className="d-flex gap-3">
                 <Link className="btn btn-primary" to="/catalog">
-                  Return to catalog
+                  Return to dashboard
                 </Link>
                 <Link className="btn btn-outline-secondary" to="/login">
                   Go to login

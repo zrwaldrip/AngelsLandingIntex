@@ -8,7 +8,7 @@ import LogoutPage from './pages/LogoutPage';
 import RegisterPage from './pages/RegisterPage';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-import AdminRootbeerPage from './pages/AdminRootbeerPage';
+import AdminProgramEntriesPage from './pages/AdminProgramEntriesPage';
 import ManageMFAPage from './pages/ManageMFAPage';
 import CookieConsentBanner from './components/CookieConsentBanner';
 import CookiePolicyPage from './pages/CookiePolicyPage';
@@ -26,9 +26,12 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/logout" element={<LogoutPage />} />
-              <Route path="/admin/rootbeers" element={<AdminRootbeerPage />} />
               <Route
-                path="/product/:rootbeerName/:rootbeerId/:currentRetailPrice"
+                path="/admin/program-entries"
+                element={<AdminProgramEntriesPage />}
+              />
+              <Route
+                path="/product/:entryName/:entryId/:currentRetailPrice"
                 element={<ProductPage />}
               />
               <Route path="/cart" element={<CartPage />} />

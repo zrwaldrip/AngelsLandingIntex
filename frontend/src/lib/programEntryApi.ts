@@ -1,11 +1,11 @@
-import { Rootbeer } from '../types/Rootbeer';
+import { ProgramEntry } from '../types/ProgramEntry';
 
-interface PagedRootbeerResponse {
-  rootbeers: Rootbeer[];
+interface PagedProgramEntryResponse {
+  entries: ProgramEntry[];
   totalCount: number;
 }
 
-export interface RootbeerInput {
+export interface ProgramEntryInput {
   rootbeerName: string;
   firstBrewedYear: string;
   breweryName: string;
@@ -43,69 +43,65 @@ async function readApiError(
   return fallbackMessage;
 }
 
-export async function getRootbeers(
+export async function getProgramEntries(
   pageSize: number,
   pageNum: number,
-  selectedContainers: string[]
-): Promise<PagedRootbeerResponse> {
+  selectedProgramAreas: string[]
+): Promise<PagedProgramEntryResponse> {
   const searchParams = new URLSearchParams({
     pageSize: pageSize.toString(),
     pageNum: pageNum.toString(),
   });
 
-  selectedContainers.forEach((container) => {
-    searchParams.append('containers', container);
+  selectedProgramAreas.forEach((programArea) => {
+    searchParams.append('programAreas', programArea);
   });
 
-  const response = await fetch(`${apiBaseUrl}/api/rootbeers?${searchParams}`);
+  const response = await fetch(`${apiBaseUrl}/api/program-entries?${searchParams}`);
 
   if (!response.ok) {
-    throw new Error('Unable to load rootbeers.');
+    throw new Error("Unable to load Angels' Landing entries.");
   }
 
   return response.json();
 }
 
-export async function getContainerTypes(): Promise<string[]> {
-  const response = await fetch(`${apiBaseUrl}/api/rootbeers/containers`);
+export async function getProgramAreas(): Promise<string[]> {
+  const response = await fetch(`${apiBaseUrl}/api/program-entries/program-areas`);
 
   if (!response.ok) {
-    throw new Error('Unable to load container types.');
+    throw new Error('Unable to load program areas.');
   }
 
   return response.json();
 }
 
-export async function getManagedRootbeers(): Promise<Rootbeer[]> {
-  const response = await fetch(`${apiBaseUrl}/api/rootbeers/admin`, {
+export async function getManagedProgramEntries(): Promise<ProgramEntry[]> {
+  const response = await fetch(`${apiBaseUrl}/api/program-entries/admin`, {
     credentials: 'include',
   });
 
   if (!response.ok) {
-    throw new Error(
-      await readApiError(response, 'Unable to load admin rootbeers.')
-    );
+    throw new Error(await readApiError(response, 'Unable to load admin records.'));
   }
 
   return response.json();
 }
 
-export async function createRootbeer(
-  rootbeer: RootbeerInput
-): Promise<Rootbeer> {
-  const response = await fetch(`${apiBaseUrl}/api/rootbeers`, {
+export async function createProgramEntry(
+  entry: ProgramEntryInput
+): Promise<ProgramEntry> {
+  const response = await fetch(`${apiBaseUrl}/api/program-entries`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify(rootbeer),
+    body: JSON.stringify(entry),
   });
 
   if (!response.ok) {
-    throw new Error(
-      await readApiError(response, 'Unable to create the rootbeer.')
-    );
+    throw new Error(await readApiError(response, 'Unable to create this record.'));
   }
 
   return response.json();

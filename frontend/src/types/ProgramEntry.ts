@@ -1,4 +1,4 @@
-export interface Rootbeer {
+export interface ProgramEntry {
   rootbeerID: string;
   rootbeerName: string;
   firstBrewedYear: string;

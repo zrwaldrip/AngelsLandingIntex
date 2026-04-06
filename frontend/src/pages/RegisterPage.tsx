@@ -45,7 +45,8 @@ function RegisterPage() {
             <div className="card-body p-4">
               <h2 className="h4 mb-3">Register</h2>
               <p className="text-muted">
-                Create an account against the ASP.NET Core Identity endpoints.
+                Create an account for Angels' Landing staff and supporter
+                workflows.
               </p>
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">

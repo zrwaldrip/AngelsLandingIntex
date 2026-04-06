@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getContainerTypes } from '../lib/rootbeerApi';
+import { getProgramAreas } from '../lib/programEntryApi';
 import './ContainerFilter.css';
 
 function ContainerFilter({
@@ -14,7 +14,7 @@ function ContainerFilter({
   useEffect(() => {
     const fetchContainers = async () => {
       try {
-        const data = await getContainerTypes();
+        const data = await getProgramAreas();
         setContainers(data);
       } catch (error) {
         console.error('Error fetching container types', error);
@@ -34,7 +34,7 @@ function ContainerFilter({
 
   return (
     <div className="container-filter">
-      <h5>Container Types</h5>
+      <h5>Program Areas</h5>
       <div className="container-list">
         {containers.map((container) => (
           <div key={container} className="container-item">
