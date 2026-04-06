@@ -57,6 +57,7 @@ function RegisterPage() {
                     id="email"
                     type="email"
                     className="form-control"
+                    autoComplete="username"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     required
@@ -70,6 +71,7 @@ function RegisterPage() {
                     id="password"
                     type="password"
                     className="form-control"
+                    autoComplete="new-password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     required
@@ -83,6 +85,7 @@ function RegisterPage() {
                     id="confirmPassword"
                     type="password"
                     className="form-control"
+                    autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
                     required

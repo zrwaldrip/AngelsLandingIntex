@@ -222,6 +222,7 @@ function ManageMfaPage() {
                               type="text"
                               className="form-control"
                               inputMode="numeric"
+                              autoComplete="one-time-code"
                               value={authenticatorCode}
                               onChange={(event) =>
                                 setAuthenticatorCode(event.target.value)

@@ -89,6 +89,7 @@ function LoginPage() {
                     id="email"
                     type="email"
                     className="form-control"
+                    autoComplete="username"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     required
@@ -102,6 +103,7 @@ function LoginPage() {
                     id="password"
                     type="password"
                     className="form-control"
+                    autoComplete="current-password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     required
@@ -116,6 +118,7 @@ function LoginPage() {
                     type="text"
                     className="form-control"
                     inputMode="numeric"
+                    autoComplete="one-time-code"
                     value={twoFactorCode}
                     onChange={(event) => setTwoFactorCode(event.target.value)}
                   />
@@ -131,6 +134,7 @@ function LoginPage() {
                     id="recoveryCode"
                     type="text"
                     className="form-control"
+                    autoComplete="off"
                     value={recoveryCode}
                     onChange={(event) => setRecoveryCode(event.target.value)}
                   />
