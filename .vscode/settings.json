@@ -1,0 +1,4 @@
+{
+  "appService.defaultWebAppToDeploy": "/subscriptions/d339ea8a-c9a1-4469-8cfd-634856afba10/resourceGroups/appsvc_windows_centralus/providers/Microsoft.Web/sites/Angels-Landing-Backend",
+  "appService.deploySubpath": "backend/RootkitAuth.API/publish"
+}
