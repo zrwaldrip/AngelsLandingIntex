@@ -9,6 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 const string FrontendCorsPolicy = "FrontendClient";
 const string DefaultFrontendUrl = "http://localhost:3000";
 var frontendUrl = builder.Configuration["FrontendUrl"] ?? DefaultFrontendUrl;
+var allowAnyOrigin = string.Equals(
+    builder.Configuration["Cors:AllowAnyOrigin"],
+    "true",
+    StringComparison.OrdinalIgnoreCase);
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 
@@ -98,7 +102,9 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.Lax;
+    // Cross-site SPA + API hosting (SWA + App Service) needs SameSite=None for cookies.
+    // This is less strict than Lax, so only use it when you explicitly enable any-origin CORS.
+    options.Cookie.SameSite = allowAnyOrigin ? SameSiteMode.None : SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
     options.SlidingExpiration = true;
@@ -108,10 +114,22 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
     {
-        policy.WithOrigins(frontendUrl)
-            .AllowCredentials()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        if (allowAnyOrigin)
+        {
+            // WARNING: Very permissive. Use only temporarily for deployment/testing.
+            // Allows credentialed requests from any origin.
+            policy.SetIsOriginAllowed(_ => true)
+                .AllowCredentials()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        }
+        else
+        {
+            policy.WithOrigins(frontendUrl)
+                .AllowCredentials()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        }
     });
 });
 
