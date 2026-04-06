@@ -1,0 +1,17 @@
+.DS_Store
+**/.DS_Store
+
+node_modules
+**/node_modules
+
+dist
+**/dist
+
+bin
+obj
+**/bin
+**/obj
+
+.env
+.env.*
+

@@ -2,8 +2,18 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 function Header() {
-  // Pull all necessary values from your context
-  const { isAuthenticated, isAdmin, statusText, statusClassName } = useAuth();
+  const { authSession, isAuthenticated, isLoading } = useAuth();
+  const isAdmin = authSession.roles.includes('Admin');
+
+  const statusText = isLoading
+    ? 'Checking sign-in…'
+    : isAuthenticated
+      ? `Signed in as ${authSession.userName ?? authSession.email ?? 'user'}`
+      : 'Not signed in';
+
+  const statusClassName = `badge ${
+    isLoading ? 'bg-secondary' : isAuthenticated ? 'bg-success' : 'bg-warning text-dark'
+  }`;
 
   return (
     <header className="row bg-secondary text-white mb-4 p-3 rounded align-items-center">
