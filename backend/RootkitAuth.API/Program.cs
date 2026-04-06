@@ -178,14 +178,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseSecurityHeaders();
-
-// CORS must run after routing is established so endpoint metadata applies correctly.
+// CORS must run after routing is established. Keep it early so preflight + all API responses get headers.
 app.UseRouting();
 app.UseCors(FrontendCorsPolicy);
+app.UseSecurityHeaders();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
-app.MapGroup("/api/auth").MapIdentityApi<ApplicationUser>();
+// Identity minimal APIs + conventional controllers need explicit CORS endpoint metadata in some hosts.
+app.MapControllers().RequireCors(FrontendCorsPolicy);
+app.MapGroup("/api/auth")
+    .RequireCors(FrontendCorsPolicy)
+    .MapIdentityApi<ApplicationUser>();
 app.Run();
