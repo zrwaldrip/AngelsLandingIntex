@@ -7,7 +7,7 @@ export interface ExternalAuthProvider {
 }
 
 const defaultApiBaseUrl =
-  'https://angels-landing-backend-e7fcddf4a6anb6g4.centralus-01.azurewebsites.net';
+  'https://angelslanding-backend-bagjg0bvcmgrbybk.centralus-01.azurewebsites.net/';
 const apiBaseUrl = (
   import.meta.env.VITE_API_BASE_URL ?? defaultApiBaseUrl
 ).replace(/\/+$/, '');
